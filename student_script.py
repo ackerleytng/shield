@@ -1,13 +1,9 @@
-from protected import protected
+import shield
 import os
 import io
 
-proc = protected.protected_class()
 
-
-proc.protected_open("/dev/null", "r", -1)
-
-os.open("/dev/null", "r", -1)
+os.open("/dev/null", os.O_RDONLY)
 
 os.remove("/dummy_folder")
 
