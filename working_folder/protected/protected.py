@@ -1,3 +1,4 @@
+import sys
 # Overwriting functions with protected ones
 class protected_class:
     def __init__(self):
@@ -8,10 +9,20 @@ class protected_class:
         os.remove = self.protected_remove
         os.rmdir = self.protected_rmdir
         os.removedirs = self.protected_removedirs
+        import io
+        io.open = self.protected_io_open
     
     def protected_open(self, name, mode=None, buffering=None):
-        print "Halt! Doing open"
+        print "Halt! Calling modified open"
         print name, mode, buffering
+
+    def protected_io_open(self, name, mode, encoding=None, buffering=None):
+        if 'w' in mode:
+            print "No writing allowed!"
+            sys.exit()
+        else:
+            io.open(name,mode)
+            print name, mode, buffering
 
     def protected_remove(self, path):
         print "Halt! Doing remove"
