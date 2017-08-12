@@ -1,8 +1,6 @@
 from protected import protected
 import os
-
 proc = protected.protected_class()
-
 
 proc.protected_open("/dev/null", "r", -1)
 
