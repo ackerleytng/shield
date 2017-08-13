@@ -1,12 +1,8 @@
-import shield
-import __builtin__
-import os
-import io
+import shield_os
+import shield_io
+import shield_builtin
 
 
-__builtin__.open = shield.shield_open
-os.open = shield.shield_os_open
-io.open = shield.shield_io_open
-os.remove = shield.shield_remove
-os.rmdir = shield.shield_rmdir
-os.removedirs = shield.shield_removedirs
+shield_os.do_hook()
+shield_io.do_hook()
+shield_builtin.do_hook()
