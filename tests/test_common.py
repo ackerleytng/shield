@@ -21,7 +21,7 @@ def test_split_path(in_, expected):
                     reason="Skipping Windows-only tests")
 @pytest.mark.parametrize("in_, expected", [
     (r"C:\Users\john\Desktop\foo\bar.txt", ("C:",
-                                            ["Users", "john", "Desktop",
+                                            ["\\", "Users", "john", "Desktop",
                                              "foo", "bar.txt"])),
 ])
 def test_split_path_windows(in_, expected):
