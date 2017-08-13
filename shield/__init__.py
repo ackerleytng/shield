@@ -1,3 +1,4 @@
+import sys
 import shield_os
 import shield_io
 import shield_builtin
@@ -12,6 +13,13 @@ def do_hook(module):
         setattr(original_module, hook, replacement_function)
 
 
-do_hook(shield_builtin)
-shield_io.do_hook()
-shield_os.do_hook()
+def install_hooks():
+    do_hook(shield_builtin)
+    shield_io.do_hook()
+    shield_os.do_hook()
+
+
+# Need to add this in so that we don't hook in pytest
+# If we want to hook in pytest, we can do that manually
+if not hasattr(sys, "_called_from_test"):
+    install_hooks()

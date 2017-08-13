@@ -1,5 +1,7 @@
 import __builtin__
 
+import os
+
 
 PREFIX = "builtin_"
 ORIGINAL_MODULE = __builtin__
