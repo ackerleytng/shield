@@ -61,10 +61,13 @@ def split_path(abspath):
     while True:
         path_in = path
         path_out, tail = os.path.split(path_in)
-        if path_in == path_out:
-            break
-        path = path_out
         parts.append(tail)
+
+        if path_in == path_out:
+            parts.append(path_out)
+            break
+
+        path = path_out
 
     # Filter empty parts
     parts = [p for p in parts if p != '']

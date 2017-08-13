@@ -3,11 +3,15 @@ from shield import common
 
 
 @pytest.mark.parametrize("in_, expected", [
+    ("", ("", [])),
+    ("foo", ("", ["foo"])),
+    ("foo/", ("", ["foo"])),
+    ("/", ("", ["/"])),
     ("foo/bar", ("", ["foo", "bar"])),
-    ("/foo/bar", ("", ["foo", "bar"])),
-    ("/foo/bar/", ("", ["foo", "bar"])),
+    ("/foo/bar", ("", ["/", "foo", "bar"])),
+    ("/foo/bar/", ("", ["/", "foo", "bar"])),
     ("foo/bar/", ("", ["foo", "bar"])),
-    ("/tmp/foo/bar.txt", ("", ["tmp", "foo", "bar.txt"])),
+    ("/tmp/foo/bar.txt", ("", ["/", "tmp", "foo", "bar.txt"])),
 ])
 def test_split_path(in_, expected):
     assert common.split_path(in_) == expected
