@@ -7,7 +7,8 @@ import os
 PREFIX = "builtin_"
 ORIGINAL_MODULE = __builtin__
 HOOKS = {
-    "open": None
+    "open": None,
+    "file": None,
 }
 
 
@@ -34,3 +35,7 @@ def builtin_open(name, mode="r", buffering=-1):
         # Otherwise, some weird mode is requested,
         #   let python's open handle it
         return original_open(name, mode, buffering)
+
+
+def builtin_file(name, mode="r", buffering=-1):
+    raise common.ShieldError("Please use open() instead.")

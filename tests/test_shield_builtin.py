@@ -62,3 +62,10 @@ def test_builtin_open(builtin_open_fixture):
             open(path, mode)
     else:
         open(path, mode)
+
+
+def test_builtin_file():
+    shield.install_hooks()
+    with pytest.raises(shield.common.ShieldError):
+        file("something")
+    shield.uninstall_hooks()
