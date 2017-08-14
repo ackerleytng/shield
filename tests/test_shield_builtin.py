@@ -1,5 +1,4 @@
 import os
-import sys
 import pytest
 import shield
 
@@ -62,6 +61,13 @@ def test_builtin_open(builtin_open_fixture):
             open(path, mode)
     else:
         open(path, mode)
+
+
+def test_builtin_open_weird():
+    shield.install_hooks()
+    with pytest.raises(TypeError):
+        open(1)
+    shield.uninstall_hooks()
 
 
 def test_builtin_file():

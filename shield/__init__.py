@@ -4,6 +4,9 @@ import shield_io
 import shield_builtin
 
 
+HOOK_MODULES = [shield_builtin, shield_os]
+
+
 def do_hook(module):
     prefix = module.PREFIX
     hooks = module.HOOKS
@@ -25,16 +28,16 @@ def do_unhook(module):
         original_function = hooks[hook]
         # Unhook the function
         setattr(original_module, hook, original_function)
+        # Reset saved hook
+        module.HOOKS[hook] = None
 
 
 def install_hooks():
-    do_hook(shield_builtin)
-    # shield_io.do_hook()
-    # shield_os.do_hook()
+    [do_hook(m) for m in HOOK_MODULES]
 
 
 def uninstall_hooks():
-    do_unhook(shield_builtin)
+    [do_unhook(m) for m in HOOK_MODULES]
 
 
 # Need to add this in so that we don't hook in pytest

@@ -16,7 +16,7 @@ def builtin_open(name, mode="r", buffering=-1):
     original_open = HOOKS["open"]
     assert original_open is not None
 
-    if mode is None or mode == "r":
+    if type(name) != str or type(mode) != str or mode == "r":
         return original_open(name, mode, buffering)
     elif (mode == "w" or
           mode == "a" or
