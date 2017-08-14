@@ -9,8 +9,6 @@ try:
 except shield.common.ShieldError:
     print "Correctly shielded!"
 
-test = something
-
 """
 os.open("/dev/null", os.O_RDONLY)
 
