@@ -108,6 +108,20 @@ def is_in_directory(path, path_to_directory):
             list_startswith(path_parts, directory_parts))
 
 
+def is_in_safe_directories(path):
+    """Returns True if path is in a 'safe' directory, where safe means
+
+    it is either in the temp directory of a system
+    or on the desktop of a system
+    """
+    temp_directory = os.path.abspath(get_temp_path())
+    desktop_directory = os.path.abspath(get_desktop_path())
+    abspath = os.path.abspath(path)
+
+    return (is_in_directory(abspath, temp_directory) or
+            is_in_directory(abspath, desktop_directory))
+
+
 def is_safe_for_writing(path):
     """Determines if a path is a safe path to write to
 
@@ -116,13 +130,10 @@ def is_safe_for_writing(path):
         on the desktop of a system) and
         if it is a file, it does not already exist)
     """
-    temp_directory = os.path.abspath(get_temp_path())
-    desktop_directory = os.path.abspath(get_desktop_path())
     abspath = os.path.abspath(path)
 
-    return ((is_in_directory(abspath, temp_directory) or
-             is_in_directory(abspath, desktop_directory))
-            and not os.path.isfile(abspath))
+    return (is_in_safe_directories(path) and
+            not os.path.isfile(abspath))
 
 
 def make_unique(path):
@@ -138,3 +149,8 @@ def make_unique(path):
         return os.path.join(drive, *path)
 
     return path
+
+
+class ShieldError(Exception):
+    def __init__(self, *args, **kwargs):
+        super(ShieldError, self).__init__(*args, **kwargs)

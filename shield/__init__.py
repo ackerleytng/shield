@@ -9,14 +9,18 @@ def do_hook(module):
     hooks = module.HOOKS
     original_module = module.ORIGINAL_MODULE
     for hook in hooks:
+        # Get the replacement function
         replacement_function = getattr(module, prefix + hook)
+        # Store the original function
+        module.HOOKS[hook] = getattr(original_module, hook)
+        # Hook the function
         setattr(original_module, hook, replacement_function)
 
 
 def install_hooks():
     do_hook(shield_builtin)
-    shield_io.do_hook()
-    shield_os.do_hook()
+    # shield_io.do_hook()
+    # shield_os.do_hook()
 
 
 # Need to add this in so that we don't hook in pytest
