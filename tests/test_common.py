@@ -1,3 +1,5 @@
+import os
+import sys
 import pytest
 from shield import common
 
@@ -64,3 +66,59 @@ def test_split_path_windows(in_, expected):
 ])
 def test_split_path_non_windows(in_, expected):
     assert common.split_path(in_) == expected
+
+
+@pytest.mark.parametrize("a, b, expected", [
+    ([], [], True),
+    ([0, 1, 2], [0, 1, 2], True),
+    ([0, 1, 2, 3], [0, 1, 2], True),
+    ([0, 1, 3], [0, 1, 2], False),
+    ([0, 1], [0, 1, 2], False),
+    (["tmp", "test"], ["tmp"], True),
+])
+def test_list_startswith(a, b, expected):
+    assert common.list_startswith(a, b) == expected
+
+
+@pytest.mark.parametrize("path, path_to_directory, expected", [
+    ("/tmp/test/stuff", "/tmp/test", True),
+    (r"I:\shared\stuff", r"C:\shared\stuff", False),
+    (r"I:\shared\stuff", r"C:\shared\stuff\zzzz", False),
+    (r"C:\shared\stuff", r"C:\shared\stuffs", False),
+])
+def test_is_in_directory(path, path_to_directory, expected):
+    assert common.is_in_directory(path, path_to_directory) == expected
+
+
+@pytest.fixture(params=[
+    (common.get_desktop_path(), False, True),
+    (common.get_temp_path(), False, True),
+    (os.path.join(common.get_desktop_path(),
+                  "unique-nonexistent-file.txt"), True, False),
+    (os.path.join(common.get_temp_path(),
+                  "unique-nonexistent-file.txt"), True, False),
+    (os.path.join(common.get_desktop_path(),
+                  "unique-nonexistent-file.txt"), False, True),
+    (os.path.join(common.get_temp_path(),
+                  "unique-nonexistent-file.txt"), False, True),
+    (sys.executable, False, False),
+])
+def is_safe_for_writing_fixture(request):
+    created_file = False
+    path, should_create, expected = request.param
+
+    if should_create:
+        path = common.make_unique(path)
+        with open(path, 'w') as f:
+            f.write("test\n")
+        created_file = True
+
+    yield (path, expected)
+
+    if created_file:
+        os.remove(path)
+
+
+def test_is_safe_for_writing(is_safe_for_writing_fixture):
+    path, expected = is_safe_for_writing_fixture
+    assert common.is_safe_for_writing(path) == expected

@@ -75,11 +75,66 @@ def split_path(abspath):
     return (drive, list(reversed(parts)))
 
 
-def is_safe(path):
+def list_startswith(a, b):
+    """Returns True if a starts with b and False otherwise
+
+    given: a = [0, 1, 2], b = [0, 1, 2]
+    expect: True
+
+    given: a = [0, 1, 2, 3], b = [0, 1, 2]
+    expect: True
+
+    given: a = [0, 1, 3], b = [0, 1, 2]
+    expect: False
+
+    given: a = [0, 1], b = [0, 1, 2]
+    expect: False
+    """
+    return (len(b) <= len(a) and
+            a[:len(b)] == b)
+
+
+def is_in_directory(path, path_to_directory):
+    """Returns True if path is in the directory pointed to by path_to_directory
+    and False otherwise
+
+    Assumes that path_to_directory points to a directory
+    """
+
+    path_drive, path_parts = split_path(path)
+    directory_drive, directory_parts = split_path(path_to_directory)
+
+    return (path_drive == directory_drive and
+            list_startswith(path_parts, directory_parts))
+
+
+def is_safe_for_writing(path):
     """Determines if a path is a safe path to write to
 
-    A path is considered safe if it is a new directory
-    + in the temp directory on a system
-    + on the desktop of a system
+    A path is considered safe if it is
+      ((in the temp directory on a system or
+        on the desktop of a system) and
+        if it is a file, it does not already exist)
     """
-    pass
+    temp_directory = os.path.abspath(get_temp_path())
+    desktop_directory = os.path.abspath(get_desktop_path())
+    abspath = os.path.abspath(path)
+
+    return ((is_in_directory(abspath, temp_directory) or
+             is_in_directory(abspath, desktop_directory))
+            and not os.path.isfile(abspath))
+
+
+def make_unique(path):
+    """Given a path, if the path already exists,
+    prepend u- to it so that it is unique.
+    If the path does not already exist, return it.
+
+    Return the path, made unique.
+    """
+    if os.path.exists(path):
+        drive, path = split_path(path)
+        path[-1] = "0-" + path[-1]
+        return os.path.join(drive, *path)
+
+    return path
