@@ -17,10 +17,24 @@ def do_hook(module):
         setattr(original_module, hook, replacement_function)
 
 
+def do_unhook(module):
+    hooks = module.HOOKS
+    original_module = module.ORIGINAL_MODULE
+    for hook in hooks:
+        # Get the original function
+        original_function = hooks[hook]
+        # Unhook the function
+        setattr(original_module, hook, original_function)
+
+
 def install_hooks():
     do_hook(shield_builtin)
     # shield_io.do_hook()
     # shield_os.do_hook()
+
+
+def uninstall_hooks():
+    do_unhook(shield_builtin)
 
 
 # Need to add this in so that we don't hook in pytest

@@ -3,6 +3,26 @@ import sys
 import tempfile
 
 
+def get_desktop_path():
+    path = os.path.expanduser("~/Desktop")
+
+    if not os.path.exists(path):
+        raise NotImplementedError("Couldn't find path to Desktop!")
+
+    return path
+
+
+def get_temp_path():
+    return tempfile.gettempdir()
+
+
+SAFE_DIRECTORIES = [get_desktop_path(), get_temp_path()]
+
+
+def add_safe_directory(path):
+    SAFE_DIRECTORIES.append(os.path.abspath(path))
+
+
 def write_check(mode):
     # perhaps a check can be done here to allow writing in some places
     # i.e not totally no writing, but to only to allowed files
@@ -21,19 +41,6 @@ def running_on_linux():
 
 def running_on_mac():
     return sys.platform.startswith("darwin")
-
-
-def get_desktop_path():
-    path = os.path.expanduser("~/Desktop")
-
-    if not os.path.exists(path):
-        raise NotImplementedError("Couldn't find path to Desktop!")
-
-    return path
-
-
-def get_temp_path():
-    return tempfile.gettempdir()
 
 
 def split_path(abspath):
@@ -114,12 +121,10 @@ def is_in_safe_directories(path):
     it is either in the temp directory of a system
     or on the desktop of a system
     """
-    temp_directory = os.path.abspath(get_temp_path())
-    desktop_directory = os.path.abspath(get_desktop_path())
     abspath = os.path.abspath(path)
+    safe_paths = [os.path.abspath(p) for p in SAFE_DIRECTORIES]
 
-    return (is_in_directory(abspath, temp_directory) or
-            is_in_directory(abspath, desktop_directory))
+    return any([is_in_directory(abspath, d) for d in safe_paths])
 
 
 def is_safe_for_writing(path):
