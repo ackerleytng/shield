@@ -6,6 +6,9 @@ PREFIX = "os_"
 ORIGINAL_MODULE = os
 HOOKS = {
     "open": None,
+    "chflags": None,
+    "chroot": None,
+    "chmod": None,
 }
 
 
@@ -29,6 +32,45 @@ def os_open(name, flags, mode=0777):
     else:
         # Something is really weird
         return original_open(name, flags, mode)
+
+
+"""
+os.fdopen is not guarded because fdopen takes a file descriptor,
+  which first has to be opened by os.open.
+The mode of fdopen must match what it was os.opened with, so there
+  shouldn't be a chance of fdopen being used for write when it wasn't
+  opened in the write mode
+This applies for all the other functions that take an fd, such as
+
++ os.fdatasync
++ os.fsync
++ os.ftruncate
++ os.write
++ os.fchmod
+"""
+
+
+# Don't think beginners would need to use these
+os_chflags = common.disable_with_shielderror(
+    "Are you sure you need to use chflags?")
+os_chroot = common.disable_with_shielderror(
+    "Are you sure you need to use chroot?")
+
+
+def os_chmod(path, mode):
+    original_chmod = HOOKS["chmod"]
+    assert original_chmod is not None
+
+    if type(path) != str or type(mode) != int:
+        print "test"
+        return original_chmod(path, mode)
+    else:
+        abspath = os.path.abspath(path)
+        if common.is_in_safe_directories(abspath):
+            return original_chmod(abspath, mode)
+        else:
+            raise common.ShieldError("You shouldn't "
+                                     "be chmodding in {}!".format(abspath))
 
 
 def os_remove(path):
