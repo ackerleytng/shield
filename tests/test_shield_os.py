@@ -85,6 +85,7 @@ def test_os_open(os_open_fixture):
     lambda: os.mkfifo("/tmp/stuff", 0666),
     lambda: os.mknod("/tmp/stuff"),
     lambda: os.mknod("/tmp/stuff", 0666, 0),
+    lambda: os.makedev(5, 5),
 ])
 def test_disabled(disabled_call):
     shield.install_hooks()

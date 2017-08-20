@@ -16,6 +16,7 @@ HOOKS = {
     "link": None,
     "mknod": None,
     "mkfifo": None,
+    "makedev": None,
 }
 
 
@@ -112,6 +113,8 @@ os_mkfifo = common.disable_with_shielderror(
     "Are you sure you need to use mkfifo?")
 os_mknod = common.disable_with_shielderror(
     "Are you sure you need to use mknod?")
+os_makedev = common.disable_with_shielderror(
+    "Are you sure you need to use makedev?")
 
 
 def os_link(source, link_name):
