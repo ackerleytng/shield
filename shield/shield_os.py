@@ -6,12 +6,16 @@ PREFIX = "os_"
 ORIGINAL_MODULE = os
 HOOKS = {
     "open": None,
-    "chflags": None,
     "chroot": None,
-    "chmod": None,
+    "chflags": None,
     "lchflags": None,
+    "chmod": None,
+    "lchmod": None,
     "chown": None,
     "lchown": None,
+    "link": None,
+    "mknod": None,
+    "mkfifo": None,
 }
 
 
@@ -53,19 +57,26 @@ This applies for all the other functions that take an fd, such as
 """
 
 
-def os_chmod(path, mode):
-    original_chmod = HOOKS["chmod"]
-    assert original_chmod is not None
+def _os_chmod(function_name, present_participle):
+    def aux(path, mode):
+        original_function = HOOKS[function_name]
+        assert original_function is not None
 
-    if type(path) != str or type(mode) != int:
-        return original_chmod(path, mode)
-    else:
-        abspath = os.path.abspath(path)
-        if common.is_in_safe_directories(abspath):
-            return original_chmod(abspath, mode)
+        if type(path) != str or type(mode) != int:
+            return original_function(path, mode)
         else:
-            raise common.ShieldError("You shouldn't "
-                                     "be chmodding in {}!".format(abspath))
+            abspath = os.path.abspath(path)
+            if common.is_in_safe_directories(abspath):
+                return original_function(abspath, mode)
+            else:
+                msg = "You shouldn't be {} in {}!".format(present_participle,
+                                                          abspath)
+                raise common.ShieldError(msg)
+    return aux
+
+
+os_chmod = _os_chmod("chmod", "chmoding")
+os_lchmod = _os_chmod("lchmod", "lchmoding")
 
 
 def _os_chown(function_name, present_participle):
@@ -97,6 +108,25 @@ os_lchflags = common.disable_with_shielderror(
     "Are you sure you need to use lchflags?")
 os_chroot = common.disable_with_shielderror(
     "Are you sure you need to use chroot?")
+os_mkfifo = common.disable_with_shielderror(
+    "Are you sure you need to use mkfifo?")
+os_mknod = common.disable_with_shielderror(
+    "Are you sure you need to use mknod?")
+
+
+def os_link(source, link_name):
+    original_function = HOOKS["link"]
+    assert original_function is not None
+
+    if type(source) != str or type(link_name) != str:
+        return original_function(source, link_name)
+    else:
+        abspath = os.path.abspath(link_name)
+        if common.is_in_safe_directories(abspath):
+            return original_function(source, link_name)
+        else:
+            msg = "You shouldn't be linking to {}!".format(abspath)
+            raise common.ShieldError(msg)
 
 
 def os_remove(path):

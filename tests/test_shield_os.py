@@ -81,6 +81,10 @@ def test_os_open(os_open_fixture):
     lambda: os.chflags("/tmp/stuff", stat.SF_IMMUTABLE),
     lambda: os.chroot("/tmp/stuff"),
     lambda: os.lchflags("/tmp/stuff", stat.SF_IMMUTABLE),
+    lambda: os.mkfifo("/tmp/stuff"),
+    lambda: os.mkfifo("/tmp/stuff", 0666),
+    lambda: os.mknod("/tmp/stuff"),
+    lambda: os.mknod("/tmp/stuff", 0666, 0),
 ])
 def test_disabled(disabled_call):
     shield.install_hooks()
@@ -127,6 +131,15 @@ def test_os_chmod(os_chmod_fixture):
             os.chmod(path, mode)
     else:
         os.chmod(path, mode)
+
+
+def test_os_lchmod(os_chmod_fixture):
+    path, mode, expected_exception = os_chmod_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.lchmod(path, mode)
+    else:
+        os.lchmod(path, mode)
 
 
 @pytest.fixture(params=[
@@ -176,3 +189,63 @@ def test_os_lchown(os_chown_fixture):
             os.lchown(path, id_, id_)
     else:
         os.lchown(path, id_, id_)
+
+
+@pytest.fixture(params=[
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"),
+     True,
+     os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-link.txt"),
+     None),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"),
+     True,
+     os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-link.txt"),
+     None),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"),
+     True,
+     os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-link.txt"),
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"),
+     False,
+     os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-link.txt"),
+     OSError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"),
+     False, 1, TypeError),
+    (0, False, 1, TypeError),
+])
+def os_link_fixture(request):
+    created_file = False
+    source, should_create, link_name, expected_exception = request.param
+
+    if should_create:
+        path = shield.common.make_unique(source)
+        with open(path, 'w') as f:
+            f.write("test\n")
+        created_file = True
+
+    shield.install_hooks()
+    yield (source, link_name, expected_exception)
+    shield.uninstall_hooks()
+
+    if expected_exception is None:
+        os.remove(link_name)
+
+    if created_file:
+        os.remove(path)
+
+
+def test_os_link(os_link_fixture):
+    source, link_name, expected_exception = os_link_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.link(source, link_name)
+    else:
+        os.link(source, link_name)
