@@ -11,6 +11,7 @@ HOOKS = {
     "chmod": None,
     "lchflags": None,
     "chown": None,
+    "lchown": None,
 }
 
 
@@ -67,19 +68,26 @@ def os_chmod(path, mode):
                                      "be chmodding in {}!".format(abspath))
 
 
-def os_chown(path, uid, gid):
-    original_chown = HOOKS["chown"]
-    assert original_chown is not None
+def _os_chown(function_name, present_participle):
+    def aux(path, uid, gid):
+        original_function = HOOKS[function_name]
+        assert original_function is not None
 
-    if type(path) != str or type(uid) != int or type(gid) != int:
-        return original_chown(path, uid, gid)
-    else:
-        abspath = os.path.abspath(path)
-        if common.is_in_safe_directories(abspath):
-            return original_chown(abspath, uid, gid)
+        if type(path) != str or type(uid) != int or type(gid) != int:
+            return original_function(path, uid, gid)
         else:
-            raise common.ShieldError("You shouldn't "
-                                     "be chownding in {}!".format(abspath))
+            abspath = os.path.abspath(path)
+            if common.is_in_safe_directories(abspath):
+                return original_function(abspath, uid, gid)
+            else:
+                msg = "You shouldn't be {} in {}!".format(present_participle,
+                                                          abspath)
+                raise common.ShieldError(msg)
+    return aux
+
+
+os_chown = _os_chown("chown", "chowning")
+os_lchown = _os_chown("lchown", "lchowning")
 
 
 # Don't think beginners would need to use these

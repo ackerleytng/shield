@@ -167,3 +167,12 @@ def test_os_chown(os_chown_fixture):
             os.chown(path, id_, id_)
     else:
         os.chown(path, id_, id_)
+
+
+def test_os_lchown(os_chown_fixture):
+    path, id_, expected_exception = os_chown_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.lchown(path, id_, id_)
+    else:
+        os.lchown(path, id_, id_)
