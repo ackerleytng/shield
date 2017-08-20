@@ -9,6 +9,8 @@ HOOKS = {
     "chflags": None,
     "chroot": None,
     "chmod": None,
+    "lchflags": None,
+    "chown": None,
 }
 
 
@@ -50,19 +52,11 @@ This applies for all the other functions that take an fd, such as
 """
 
 
-# Don't think beginners would need to use these
-os_chflags = common.disable_with_shielderror(
-    "Are you sure you need to use chflags?")
-os_chroot = common.disable_with_shielderror(
-    "Are you sure you need to use chroot?")
-
-
 def os_chmod(path, mode):
     original_chmod = HOOKS["chmod"]
     assert original_chmod is not None
 
     if type(path) != str or type(mode) != int:
-        print "test"
         return original_chmod(path, mode)
     else:
         abspath = os.path.abspath(path)
@@ -71,6 +65,30 @@ def os_chmod(path, mode):
         else:
             raise common.ShieldError("You shouldn't "
                                      "be chmodding in {}!".format(abspath))
+
+
+def os_chown(path, uid, gid):
+    original_chown = HOOKS["chown"]
+    assert original_chown is not None
+
+    if type(path) != str or type(uid) != int or type(gid) != int:
+        return original_chown(path, uid, gid)
+    else:
+        abspath = os.path.abspath(path)
+        if common.is_in_safe_directories(abspath):
+            return original_chown(abspath, uid, gid)
+        else:
+            raise common.ShieldError("You shouldn't "
+                                     "be chownding in {}!".format(abspath))
+
+
+# Don't think beginners would need to use these
+os_chflags = common.disable_with_shielderror(
+    "Are you sure you need to use chflags?")
+os_lchflags = common.disable_with_shielderror(
+    "Are you sure you need to use lchflags?")
+os_chroot = common.disable_with_shielderror(
+    "Are you sure you need to use chroot?")
 
 
 def os_remove(path):
