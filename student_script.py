@@ -1,6 +1,5 @@
 import shield
-# import os
-# import io
+import os
 
 
 try:
@@ -8,6 +7,7 @@ try:
         print f.read()
 except shield.common.ShieldError:
     print "Correctly shielded!"
+
 
 """
 os.open("/dev/null", os.O_RDONLY)
