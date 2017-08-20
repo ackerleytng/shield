@@ -159,3 +159,9 @@ def make_unique(path):
 class ShieldError(Exception):
     def __init__(self, *args, **kwargs):
         super(ShieldError, self).__init__(*args, **kwargs)
+
+
+def disable_with_shielderror(string):
+    def aux(*arg):
+        raise ShieldError(string)
+    return aux
