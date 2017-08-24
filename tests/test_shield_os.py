@@ -250,3 +250,64 @@ def test_os_link(os_link_fixture):
             os.link(source, link_name)
     else:
         os.link(source, link_name)
+
+
+@pytest.fixture(params=[
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-directory"), 0755, None),
+    (os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-directory"), 0755, None),
+    (os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-directory"), 0755,
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-directory"), None, None),
+    (os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-directory"), 0755,
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-directory"), "x", TypeError),
+])
+def os_mkdir_fixture(request):
+    path, mode, expected_exception = request.param
+
+    shield.install_hooks()
+    yield (path, mode, expected_exception)
+    shield.uninstall_hooks()
+
+    if expected_exception is None:
+        os.rmdir(path)
+
+
+def test_os_mkdir(os_mkdir_fixture):
+    path, mode, expected_exception = os_mkdir_fixture
+
+    if mode is None:
+        def call():
+            os.mkdir(path)
+    else:
+        def call():
+            os.mkdir(path, mode)
+
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            call()
+    else:
+        call()
+
+
+def test_os_makedirs(os_mkdir_fixture):
+    path, mode, expected_exception = os_mkdir_fixture
+
+    if mode is None:
+        def call():
+            os.makedirs(path)
+    else:
+        def call():
+            os.makedirs(path, mode)
+
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            call()
+    else:
+        call()

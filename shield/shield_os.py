@@ -17,6 +17,8 @@ HOOKS = {
     "mknod": None,
     "mkfifo": None,
     "makedev": None,
+    "mkdir": None,
+    "makedirs": None,
 }
 
 
@@ -100,6 +102,31 @@ def _os_chown(function_name, present_participle):
 
 os_chown = _os_chown("chown", "chowning")
 os_lchown = _os_chown("lchown", "lchowning")
+
+
+# This is different from _os_chown because for mkdir,
+#   mode is optional
+
+def _os_mkdir(function_name, present_participle):
+    def aux(path, mode=0777):
+        original_function = HOOKS[function_name]
+        assert original_function is not None
+
+        if type(path) != str or type(mode) != int:
+            return original_function(path, mode)
+        else:
+            abspath = os.path.abspath(path)
+            if common.is_in_safe_directories(abspath):
+                return original_function(abspath, mode)
+            else:
+                msg = "You shouldn't be {} in {}!".format(present_participle,
+                                                          abspath)
+                raise common.ShieldError(msg)
+    return aux
+
+
+os_mkdir = _os_mkdir("mkdir", "making a directory")
+os_makedirs = _os_mkdir("makedirs", "making a directory")
 
 
 # Don't think beginners would need to use these
