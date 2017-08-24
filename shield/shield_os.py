@@ -19,6 +19,7 @@ HOOKS = {
     "makedev": None,
     "mkdir": None,
     "makedirs": None,
+    "pathconf": None,
 }
 
 
@@ -142,6 +143,8 @@ os_mknod = common.disable_with_shielderror(
     "Are you sure you need to use mknod?")
 os_makedev = common.disable_with_shielderror(
     "Are you sure you need to use makedev?")
+os_pathconf = common.disable_with_shielderror(
+    "Are you sure you need to use pathconf?")
 
 
 def os_link(source, link_name):
