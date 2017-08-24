@@ -20,6 +20,8 @@ HOOKS = {
     "mkdir": None,
     "makedirs": None,
     "pathconf": None,
+    "removedirs": None,
+    "renames": None,
 }
 
 
@@ -145,6 +147,11 @@ os_makedev = common.disable_with_shielderror(
     "Are you sure you need to use makedev?")
 os_pathconf = common.disable_with_shielderror(
     "Are you sure you need to use pathconf?")
+os_removedirs = common.disable_with_shielderror(
+    "removedirs is dangerous because "
+    "it keeps removing up the directory hierarchy")
+os_renames = common.disable_with_shielderror(
+    "renames is dangerous because it uses removedirs")
 
 
 def os_link(source, link_name):
@@ -169,9 +176,4 @@ def os_remove(path):
 
 def os_rmdir(path):
     print "Halt! Doing rmdir"
-    print path
-
-
-def os_removedirs(path):
-    print "Halt! Doing removedirs"
     print path

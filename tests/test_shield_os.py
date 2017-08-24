@@ -1,6 +1,6 @@
 import os
-import sys
 import stat
+import traceback
 import pytest
 import shield
 
@@ -87,12 +87,20 @@ def test_os_open(os_open_fixture):
     lambda: os.mknod("/tmp/stuff", 0666, 0),
     lambda: os.makedev(5, 5),
     lambda: os.pathconf("/tmp/stuff", "PC_FILESIZEBITS"),
+    lambda: os.removedirs("/tmp/stuff"),
+    lambda: os.renames("/tmp/stuff", "/tmp/other-stuff"),
 ])
 def test_disabled(disabled_call):
     shield.install_hooks()
-    with pytest.raises(shield.common.ShieldError):
-        disabled_call()
-    shield.uninstall_hooks()
+    try:
+        # With this try-except, other errors will be caught
+        #   and hooks will still be uninstalled
+        with pytest.raises(shield.common.ShieldError):
+            disabled_call()
+    except Exception as e:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
 
 @pytest.fixture(params=[
