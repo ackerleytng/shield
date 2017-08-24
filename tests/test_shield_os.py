@@ -320,3 +320,43 @@ def test_os_makedirs(os_mkdir_fixture):
             call()
     else:
         call()
+
+
+@pytest.fixture(params=[
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"), True, None),
+    (os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-file.txt"), True, None),
+    (os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-link.txt"), True,
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file.txt"),
+     False, OSError),
+    (0, False, TypeError),
+])
+def os_remove_fixture(request):
+    created_file = False
+    path, should_create, expected_exception = request.param
+
+    if should_create:
+        path = shield.common.make_unique(path)
+        with open(path, 'w') as f:
+            f.write("test\n")
+        created_file = True
+
+    shield.install_hooks()
+    yield (path, expected_exception)
+    shield.uninstall_hooks()
+
+    if created_file and expected_exception is not None:
+        os.remove(path)
+
+
+def test_os_remove(os_remove_fixture):
+    path, expected_exception = os_remove_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.remove(path)
+    else:
+        os.remove(path)

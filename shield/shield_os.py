@@ -22,6 +22,7 @@ HOOKS = {
     "pathconf": None,
     "removedirs": None,
     "renames": None,
+    "remove": None,
 }
 
 
@@ -170,8 +171,18 @@ def os_link(source, link_name):
 
 
 def os_remove(path):
-    print "Halt! Doing remove"
-    print path
+    original_function = HOOKS["remove"]
+    assert original_function is not None
+
+    if type(path) != str:
+        return original_function(path)
+    else:
+        abspath = os.path.abspath(path)
+        if common.is_in_safe_directories(abspath):
+            return original_function(path)
+        else:
+            msg = "You shouldn't be removing {}!".format(abspath)
+            raise common.ShieldError(msg)
 
 
 def os_rmdir(path):
