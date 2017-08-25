@@ -14,6 +14,7 @@ HOOKS = {
     "chown": None,
     "lchown": None,
     "link": None,
+    "symlink": None,
     "mknod": None,
     "mkfifo": None,
     "makedev": None,
@@ -157,19 +158,25 @@ os_renames = common.disable_with_shielderror(
     "renames is dangerous because it uses removedirs")
 
 
-def os_link(source, link_name):
-    original_function = HOOKS["link"]
-    assert original_function is not None
+def _os_link(function_name):
+    def aux(source, link_name):
+        original_function = HOOKS[function_name]
+        assert original_function is not None
 
-    if type(source) != str or type(link_name) != str:
-        return original_function(source, link_name)
-    else:
-        abspath = os.path.abspath(link_name)
-        if common.is_in_safe_directories(abspath):
+        if type(source) != str or type(link_name) != str:
             return original_function(source, link_name)
         else:
-            msg = "You shouldn't be linking to {}!".format(abspath)
-            raise common.ShieldError(msg)
+            abspath = os.path.abspath(link_name)
+            if common.is_in_safe_directories(abspath):
+                return original_function(source, link_name)
+            else:
+                msg = "You shouldn't be linking to {}!".format(abspath)
+                raise common.ShieldError(msg)
+    return aux
+
+
+os_link = _os_link("link")
+os_symlink = _os_link("symlink")
 
 
 def _os_remove(function_name, present_participle):

@@ -234,12 +234,6 @@ def test_os_lchown(os_chown_fixture):
      shield.common.ShieldError),
     (os.path.join(shield.common.get_temp_path(),
                   "unique-nonexistent-file.txt"),
-     False,
-     os.path.join(shield.common.get_desktop_path(),
-                  "unique-nonexistent-link.txt"),
-     OSError),
-    (os.path.join(shield.common.get_temp_path(),
-                  "unique-nonexistent-file.txt"),
      False, 1, TypeError),
     (0, False, 1, TypeError),
 ])
@@ -275,6 +269,15 @@ def test_os_link(os_link_fixture):
             os.link(source, link_name)
     else:
         os.link(source, link_name)
+
+
+def test_os_symlink(os_link_fixture):
+    source, link_name, expected_exception = os_link_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.symlink(source, link_name)
+    else:
+        os.symlink(source, link_name)
 
 
 @pytest.fixture(params=[
