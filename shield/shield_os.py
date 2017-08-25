@@ -23,6 +23,7 @@ HOOKS = {
     "removedirs": None,
     "renames": None,
     "remove": None,
+    "rmdir": None,
 }
 
 
@@ -129,8 +130,8 @@ def _os_mkdir(function_name, present_participle):
     return aux
 
 
-os_mkdir = _os_mkdir("mkdir", "making a directory")
-os_makedirs = _os_mkdir("makedirs", "making a directory")
+os_mkdir = _os_mkdir("mkdir", "making the directory")
+os_makedirs = _os_mkdir("makedirs", "making the directory")
 
 
 # Don't think beginners would need to use these
@@ -170,21 +171,23 @@ def os_link(source, link_name):
             raise common.ShieldError(msg)
 
 
-def os_remove(path):
-    original_function = HOOKS["remove"]
-    assert original_function is not None
+def _os_remove(function_name, present_participle):
+    def aux(path):
+        original_function = HOOKS[function_name]
+        assert original_function is not None
 
-    if type(path) != str:
-        return original_function(path)
-    else:
-        abspath = os.path.abspath(path)
-        if common.is_in_safe_directories(abspath):
+        if type(path) != str:
             return original_function(path)
         else:
-            msg = "You shouldn't be removing {}!".format(abspath)
-            raise common.ShieldError(msg)
+            abspath = os.path.abspath(path)
+            if common.is_in_safe_directories(abspath):
+                return original_function(path)
+            else:
+                msg = "You shouldn't be {} {}!".format(present_participle,
+                                                       abspath)
+                raise common.ShieldError(msg)
+    return aux
 
 
-def os_rmdir(path):
-    print "Halt! Doing rmdir"
-    print path
+os_remove = _os_remove("remove", "removing the directory")
+os_rmdir = _os_remove("rmdir", "making a directory")

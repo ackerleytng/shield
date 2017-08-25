@@ -328,7 +328,7 @@ def test_os_makedirs(os_mkdir_fixture):
     (os.path.join(shield.common.get_desktop_path(),
                   "unique-nonexistent-file.txt"), True, None),
     (os.path.join(os.path.expanduser("~"),
-                  "unique-nonexistent-link.txt"), True,
+                  "unique-nonexistent-file.txt"), True,
      shield.common.ShieldError),
     (os.path.join(shield.common.get_temp_path(),
                   "unique-nonexistent-file.txt"),
@@ -360,3 +360,42 @@ def test_os_remove(os_remove_fixture):
             os.remove(path)
     else:
         os.remove(path)
+
+
+@pytest.fixture(params=[
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-directory"), True, None),
+    (os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-directory"), True, None),
+    (os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-directory"), True,
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-directory"),
+     False, OSError),
+    (0, False, TypeError),
+])
+def os_rmdir_fixture(request):
+    created_directory = False
+    path, should_create, expected_exception = request.param
+
+    if should_create:
+        path = shield.common.make_unique(path)
+        os.mkdir(path)
+        created_directory = True
+
+    shield.install_hooks()
+    yield (path, expected_exception)
+    shield.uninstall_hooks()
+
+    if created_directory and expected_exception is not None:
+        os.rmdir(path)
+
+
+def test_os_rmdir(os_rmdir_fixture):
+    path, expected_exception = os_rmdir_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.rmdir(path)
+    else:
+        os.rmdir(path)
