@@ -93,6 +93,7 @@ def test_os_open(os_open_fixture):
     lambda: os.pathconf("/tmp/stuff", "PC_FILESIZEBITS"),
     lambda: os.removedirs("/tmp/stuff"),
     lambda: os.renames("/tmp/stuff", "/tmp/other-stuff"),
+    lambda: os.utime("/tmp/stuff", None),
 ])
 def test_disabled(disabled_call):
     shield.install_hooks()

@@ -27,6 +27,7 @@ HOOKS = {
     "rmdir": None,
     "unlink": None,
     "rename": None,
+    "utime": None,
 }
 
 
@@ -157,6 +158,8 @@ os_removedirs = common.disable_with_shielderror(
     "it keeps removing up the directory hierarchy")
 os_renames = common.disable_with_shielderror(
     "renames is dangerous because it uses removedirs")
+os_utime = common.disable_with_shielderror(
+    "Are you sure you need to use utime?")
 
 
 def _os_link(function_name):
