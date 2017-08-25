@@ -389,6 +389,15 @@ def test_os_remove(os_remove_fixture):
         os.remove(path)
 
 
+def test_os_unlink(os_remove_fixture):
+    path, expected_exception = os_remove_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.unlink(path)
+    else:
+        os.unlink(path)
+
+
 @pytest.fixture(params=[
     (os.path.join(shield.common.get_temp_path(),
                   "unique-nonexistent-directory"), True, None),

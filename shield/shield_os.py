@@ -25,6 +25,7 @@ HOOKS = {
     "renames": None,
     "remove": None,
     "rmdir": None,
+    "unlink": None,
     "rename": None,
 }
 
@@ -198,6 +199,7 @@ def _os_remove(function_name, present_participle):
 
 
 os_remove = _os_remove("remove", "removing the directory")
+os_unlink = _os_remove("unlink", "removing the directory")
 os_rmdir = _os_remove("rmdir", "making a directory")
 
 
