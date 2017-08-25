@@ -24,6 +24,7 @@ HOOKS = {
     "renames": None,
     "remove": None,
     "rmdir": None,
+    "rename": None,
 }
 
 
@@ -191,3 +192,22 @@ def _os_remove(function_name, present_participle):
 
 os_remove = _os_remove("remove", "removing the directory")
 os_rmdir = _os_remove("rmdir", "making a directory")
+
+
+def os_rename(src, dst):
+    original_function = HOOKS["rename"]
+    assert original_function is not None
+
+    if type(src) != str or type(dst) != str:
+        return original_function(src, dst)
+    else:
+        src_abspath = os.path.abspath(src)
+        dst_abspath = os.path.abspath(dst)
+        if not common.is_in_safe_directories(src_abspath):
+            msg = "You shouldn't be removing files in {}!".format(src_abspath)
+            raise common.ShieldError(msg)
+        elif not common.is_in_safe_directories(dst_abspath):
+            msg = "You shouldn't be writing files to {}!".format(dst_abspath)
+            raise common.ShieldError(msg)
+        else:
+            return original_function(src, dst)

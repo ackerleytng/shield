@@ -61,8 +61,12 @@ def os_open_fixture(request):
         created_file = True
 
     shield.install_hooks()
-    yield (path, flags, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, flags, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if created_file:
         os.remove(path)
@@ -97,7 +101,7 @@ def test_disabled(disabled_call):
         #   and hooks will still be uninstalled
         with pytest.raises(shield.common.ShieldError):
             disabled_call()
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
     finally:
         shield.uninstall_hooks()
@@ -127,8 +131,12 @@ def os_chmod_fixture(request):
         created_file = True
 
     shield.install_hooks()
-    yield (path, mode, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, mode, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if created_file:
         os.remove(path)
@@ -176,8 +184,12 @@ def os_chown_fixture(request):
         created_file = True
 
     shield.install_hooks()
-    yield (path, id_, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, id_, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if created_file:
         os.remove(path)
@@ -242,8 +254,12 @@ def os_link_fixture(request):
         created_file = True
 
     shield.install_hooks()
-    yield (source, link_name, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (source, link_name, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if expected_exception is None:
         os.remove(link_name)
@@ -281,8 +297,12 @@ def os_mkdir_fixture(request):
     path, mode, expected_exception = request.param
 
     shield.install_hooks()
-    yield (path, mode, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, mode, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if expected_exception is None:
         os.rmdir(path)
@@ -346,8 +366,12 @@ def os_remove_fixture(request):
         created_file = True
 
     shield.install_hooks()
-    yield (path, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if created_file and expected_exception is not None:
         os.remove(path)
@@ -385,8 +409,12 @@ def os_rmdir_fixture(request):
         created_directory = True
 
     shield.install_hooks()
-    yield (path, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if created_directory and expected_exception is not None:
         os.rmdir(path)
@@ -399,3 +427,70 @@ def test_os_rmdir(os_rmdir_fixture):
             os.rmdir(path)
     else:
         os.rmdir(path)
+
+
+@pytest.fixture(params=[
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file"), True,
+     os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-file"),
+     None),
+    (os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-file"), True,
+     os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file"),
+     None),
+    (os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-file"), True,
+     os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file"),
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file"), True,
+     os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-file"),
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file"), False,
+     os.path.join(os.path.expanduser("~"),
+                  "unique-nonexistent-file"),
+     shield.common.ShieldError),
+    (os.path.join(shield.common.get_temp_path(),
+                  "unique-nonexistent-file"), False,
+     os.path.join(shield.common.get_desktop_path(),
+                  "unique-nonexistent-file"),
+     OSError),
+    (0, False, 0, TypeError),
+])
+def os_rename_fixture(request):
+    created_file = False
+    src, should_create, dst, expected_exception = request.param
+
+    if should_create:
+        src = shield.common.make_unique(src)
+        with open(src, 'w') as f:
+            f.write("test\n")
+        created_file = True
+
+    shield.install_hooks()
+    try:
+        yield (src, dst, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
+
+    if created_file:
+        if expected_exception is None:
+            os.remove(dst)
+        else:
+            os.remove(src)
+
+
+def test_os_rename(os_rename_fixture):
+    src, dst, expected_exception = os_rename_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            os.rename(src, dst)
+    else:
+        os.rename(src, dst)
