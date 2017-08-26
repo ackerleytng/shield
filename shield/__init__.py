@@ -17,7 +17,7 @@ def do_hook(module):
             module.HOOKS[hook] = getattr(original_module, hook)
         except AttributeError as e:
             if "has no attribute" in e.message:
-                # Different platform will offer different hooks
+                # Different platforms will offer different hooks
                 #   just ignore those that don't exist
                 continue
         # Get the replacement function
