@@ -76,9 +76,11 @@ def test_os_open(os_open_fixture):
     path, flags, expected_exception = os_open_fixture
     if expected_exception:
         with pytest.raises(expected_exception):
-            os.open(path, flags)
+            fd = os.open(path, flags)
     else:
-        os.open(path, flags)
+        fd = os.open(path, flags)
+
+    os.close(fd)
 
 
 @pytest.mark.parametrize("disabled_call", [
