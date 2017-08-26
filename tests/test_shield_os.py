@@ -153,6 +153,8 @@ def test_os_chmod(os_chmod_fixture):
         os.chmod(path, mode)
 
 
+@pytest.mark.skipif(not hasattr(os, "lchmod"),
+                    reason="os.lchmod does not exist")
 def test_os_lchmod(os_chmod_fixture):
     path, mode, expected_exception = os_chmod_fixture
     if expected_exception:
