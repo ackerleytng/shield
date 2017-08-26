@@ -199,6 +199,8 @@ def os_chown_fixture(request):
         os.remove(path)
 
 
+@pytest.mark.skipif(not hasattr(os, "chown"),
+                    reason="os.chown does not exist")
 def test_os_chown(os_chown_fixture):
     path, id_, expected_exception = os_chown_fixture
     if expected_exception:
@@ -208,6 +210,8 @@ def test_os_chown(os_chown_fixture):
         os.chown(path, id_, id_)
 
 
+@pytest.mark.skipif(not hasattr(os, "lchown"),
+                    reason="os.lchown does not exist")
 def test_os_lchown(os_chown_fixture):
     path, id_, expected_exception = os_chown_fixture
     if expected_exception:
@@ -266,6 +270,8 @@ def os_link_fixture(request):
         os.remove(path)
 
 
+@pytest.mark.skipif(not hasattr(os, "link"),
+                    reason="os.link does not exist")
 def test_os_link(os_link_fixture):
     source, link_name, expected_exception = os_link_fixture
     if expected_exception:
@@ -275,6 +281,8 @@ def test_os_link(os_link_fixture):
         os.link(source, link_name)
 
 
+@pytest.mark.skipif(not hasattr(os, "symlink"),
+                    reason="os.symlink does not exist")
 def test_os_symlink(os_link_fixture):
     source, link_name, expected_exception = os_link_fixture
     if expected_exception:
