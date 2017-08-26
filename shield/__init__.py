@@ -12,10 +12,16 @@ def do_hook(module):
     hooks = module.HOOKS
     original_module = module.ORIGINAL_MODULE
     for hook in hooks:
+        # Store the original function
+        try:
+            module.HOOKS[hook] = getattr(original_module, hook)
+        except AttributeError as e:
+            if "has no attribute" in e.message:
+                # Different platform will offer different hooks
+                #   just ignore those that don't exist
+                continue
         # Get the replacement function
         replacement_function = getattr(module, prefix + hook)
-        # Store the original function
-        module.HOOKS[hook] = getattr(original_module, hook)
         # Hook the function
         setattr(original_module, hook, replacement_function)
 
