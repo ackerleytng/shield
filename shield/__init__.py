@@ -4,7 +4,7 @@ import shield_io
 import shield_builtin
 
 
-HOOK_MODULES = [shield_builtin, shield_os]
+HOOK_MODULES = [shield_builtin, shield_os, shield_io]
 
 
 def do_hook(module):
