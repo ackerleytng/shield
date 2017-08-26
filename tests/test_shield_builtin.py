@@ -1,4 +1,5 @@
 import os
+import traceback
 import pytest
 import shield
 
@@ -47,8 +48,12 @@ def builtin_open_fixture(request):
         created_file = True
 
     shield.install_hooks()
-    yield (path, mode, expected_exception)
-    shield.uninstall_hooks()
+    try:
+        yield (path, mode, expected_exception)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
     if created_file:
         os.remove(path)
