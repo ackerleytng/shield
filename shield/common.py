@@ -159,10 +159,10 @@ def make_unique(path):
 
     Return the path, made unique.
     """
-    if os.path.exists(path):
+    while os.path.exists(path):
         drive, path = split_path(path)
         path[-1] = "u-" + path[-1]
-        return os.path.join(drive, *path)
+        path = os.path.join(drive, *path)
 
     return path
 
