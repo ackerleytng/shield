@@ -79,8 +79,7 @@ def test_os_open(os_open_fixture):
             fd = os.open(path, flags)
     else:
         fd = os.open(path, flags)
-
-    os.close(fd)
+        os.close(fd)
 
 
 @pytest.mark.parametrize("disabled_call", [
