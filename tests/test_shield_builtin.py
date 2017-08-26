@@ -70,13 +70,21 @@ def test_builtin_open(builtin_open_fixture):
 
 def test_builtin_open_weird():
     shield.install_hooks()
-    with pytest.raises(TypeError):
-        open(1)
-    shield.uninstall_hooks()
+    try:
+        with pytest.raises(TypeError):
+            open(1)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
 
 
 def test_builtin_file():
     shield.install_hooks()
-    with pytest.raises(shield.common.ShieldError):
-        file("something")
-    shield.uninstall_hooks()
+    try:
+        with pytest.raises(shield.common.ShieldError):
+            file("something")
+    except Exception:
+        traceback.print_exc()
+    finally:
+        shield.uninstall_hooks()
