@@ -3,8 +3,31 @@ import sys
 import tempfile
 
 
+def running_on_windows():
+    return sys.platform.startswith("win")
+
+
+def running_in_cygwin():
+    return running_on_windows() and os.environ.get("CYGWIN_VERSION", False)
+
+def running_on_linux():
+    return sys.platform.startswith("linux")
+
+
+def running_on_mac():
+    return sys.platform.startswith("darwin")
+
+
 def get_desktop_path():
-    path = os.path.expanduser("~/Desktop")
+    if running_on_windows():
+        # Because expanduser in cygwin does not point to Windows' home
+        user_profile = os.environ.get("USERPROFILE", None)
+        if user_profile is None:
+            raise NotImplementedError("Couldn't find path to Desktop!")
+
+        path = os.path.join(user_profile, "Desktop")
+    else:
+        path = os.path.expanduser("~/Desktop")
 
     if not os.path.exists(path):
         raise NotImplementedError("Couldn't find path to Desktop!")
@@ -29,18 +52,6 @@ def write_check(mode):
     # can be totally no writing for now
     if "w" in mode:
         print "No writing!"
-
-
-def running_on_windows():
-    return sys.platform.startswith("win")
-
-
-def running_on_linux():
-    return sys.platform.startswith("linux")
-
-
-def running_on_mac():
-    return sys.platform.startswith("darwin")
 
 
 def split_path(abspath):
