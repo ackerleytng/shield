@@ -85,13 +85,26 @@ def test_io_open(io_open_fixture):
                                              len(test_file_contents))
 
 
-def test_io_FileIO_init(io_open_fixture):
+def test_io_FileIO(io_open_fixture):
+    test_string = u"shampoo\n"
     path, mode, created_file, expected_exception = io_open_fixture
     if expected_exception:
         with pytest.raises(expected_exception):
             io.FileIO(path, mode)
     else:
-        io.FileIO(path, mode)
+        with io.FileIO(path, mode) as f:
+            if mode == "r":
+                f.read()
+            else:
+                f.write(test_string)
+
+        if mode == "r":
+            assert os.stat(path).st_size == len(test_file_contents)
+        elif "w" in mode or mode == "r+":
+            assert os.stat(path).st_size == len(test_string)
+        else:
+            assert os.stat(path).st_size == (len(test_string) +
+                                             len(test_file_contents))
 
 
 def test_io_open_weird():
