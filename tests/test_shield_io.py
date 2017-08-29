@@ -5,6 +5,9 @@ import pytest
 import shield
 
 
+test_file_contents = "test\n"
+
+
 @pytest.fixture(params=[
     (os.path.join(shield.common.get_temp_path(),
                   "unique-nonexistent-file.txt"), True, "r", None),
@@ -45,32 +48,45 @@ def io_open_fixture(request):
     if should_create:
         path = shield.common.make_unique(path)
         with open(path, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
     try:
-        yield (path, mode, expected_exception)
+        yield (path, mode, created_file, expected_exception)
     except Exception:
         traceback.print_exc()
     finally:
         shield.uninstall_hooks()
 
-    if created_file:
+    if created_file or expected_exception is None:
         os.remove(path)
 
 
 def test_io_open(io_open_fixture):
-    path, mode, expected_exception = io_open_fixture
+    test_string = u"pineapple\n"
+    path, mode, created_file, expected_exception = io_open_fixture
     if expected_exception:
         with pytest.raises(expected_exception):
             io.open(path, mode)
     else:
-        io.open(path, mode)
+        with io.open(path, mode) as f:
+            if mode == "r":
+                f.read()
+            else:
+                f.write(test_string)
+
+        if mode == "r":
+            assert os.stat(path).st_size == len(test_file_contents)
+        elif "w" in mode or mode == "r+":
+            assert os.stat(path).st_size == len(test_string)
+        else:
+            assert os.stat(path).st_size == (len(test_string) +
+                                             len(test_file_contents))
 
 
 def test_io_FileIO_init(io_open_fixture):
-    path, mode, expected_exception = io_open_fixture
+    path, mode, created_file, expected_exception = io_open_fixture
     if expected_exception:
         with pytest.raises(expected_exception):
             io.FileIO(path, mode)
