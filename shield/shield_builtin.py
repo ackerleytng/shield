@@ -10,10 +10,11 @@ HOOKS = {
     "open": None,
     "file": None,
 }
+ORIGINALS = {}
 
 
 def builtin_open(name, mode="r", buffering=-1):
-    original_open = HOOKS["open"]
+    original_open = ORIGINALS["open"]
     assert original_open is not None
 
     if type(name) != str or type(mode) != str or mode == "r":

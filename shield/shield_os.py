@@ -29,10 +29,11 @@ HOOKS = {
     "rename": None,
     "utime": None,
 }
+ORIGINALS = {}
 
 
 def os_open(name, flags, mode=0777):
-    original_open = HOOKS["open"]
+    original_open = ORIGINALS["open"]
     assert original_open is not None
 
     if type(name) != str or type(flags) != int or flags == os.O_RDONLY:
@@ -71,7 +72,7 @@ This applies for all the other functions that take an fd, such as
 
 def _os_chmod(function_name, present_participle):
     def aux(path, mode):
-        original_function = HOOKS[function_name]
+        original_function = ORIGINALS[function_name]
         assert original_function is not None
 
         if type(path) != str or type(mode) != int:
@@ -93,7 +94,7 @@ os_lchmod = _os_chmod("lchmod", "lchmoding")
 
 def _os_chown(function_name, present_participle):
     def aux(path, uid, gid):
-        original_function = HOOKS[function_name]
+        original_function = ORIGINALS[function_name]
         assert original_function is not None
 
         if type(path) != str or type(uid) != int or type(gid) != int:
@@ -118,7 +119,7 @@ os_lchown = _os_chown("lchown", "lchowning")
 
 def _os_mkdir(function_name, present_participle):
     def aux(path, mode=0777):
-        original_function = HOOKS[function_name]
+        original_function = ORIGINALS[function_name]
         assert original_function is not None
 
         if type(path) != str or type(mode) != int:
@@ -164,7 +165,7 @@ os_utime = common.disable_with_shielderror(
 
 def _os_link(function_name):
     def aux(source, link_name):
-        original_function = HOOKS[function_name]
+        original_function = ORIGINALS[function_name]
         assert original_function is not None
 
         if type(source) != str or type(link_name) != str:
@@ -185,7 +186,7 @@ os_symlink = _os_link("symlink")
 
 def _os_remove(function_name, present_participle):
     def aux(path):
-        original_function = HOOKS[function_name]
+        original_function = ORIGINALS[function_name]
         assert original_function is not None
 
         if type(path) != str:
@@ -207,7 +208,7 @@ os_rmdir = _os_remove("rmdir", "making a directory")
 
 
 def os_rename(src, dst):
-    original_function = HOOKS["rename"]
+    original_function = ORIGINALS["rename"]
     assert original_function is not None
 
     if type(src) != str or type(dst) != str:

@@ -69,6 +69,15 @@ def test_io_open(io_open_fixture):
         io.open(path, mode)
 
 
+def test_io_FileIO_init(io_open_fixture):
+    path, mode, expected_exception = io_open_fixture
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            io.FileIO(path, mode)
+    else:
+        io.FileIO(path, mode)
+
+
 def test_io_open_weird():
     shield.install_hooks()
     try:
