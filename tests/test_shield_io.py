@@ -94,7 +94,7 @@ def test_io_FileIO(io_open_fixture):
     else:
         with io.FileIO(path, mode) as f:
             if mode == "r":
-                f.read()
+                assert f.read() == test_file_contents
             else:
                 f.write(test_string)
 
