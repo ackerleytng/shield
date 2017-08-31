@@ -72,7 +72,7 @@ def test_io_open(io_open_fixture):
     else:
         with io.open(path, mode) as f:
             if mode == "r":
-                f.read()
+                assert f.read() == test_file_contents
             else:
                 f.write(test_string)
 
