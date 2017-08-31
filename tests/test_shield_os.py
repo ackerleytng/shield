@@ -5,6 +5,9 @@ import pytest
 import shield
 
 
+test_file_contents = "test\n"
+
+
 @pytest.fixture(params=[
     (os.path.join(shield.common.get_temp_path(),
                   "unique-nonexistent-file.txt"), True, os.O_RDONLY, None),
@@ -57,7 +60,7 @@ def os_open_fixture(request):
     if should_create:
         path = shield.common.make_unique(path)
         with open(path, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
@@ -73,13 +76,26 @@ def os_open_fixture(request):
 
 
 def test_os_open(os_open_fixture):
+    test_string = "coffee\n"
     path, flags, expected_exception = os_open_fixture
     if expected_exception:
         with pytest.raises(expected_exception):
             fd = os.open(path, flags)
     else:
         fd = os.open(path, flags)
+        if flags == os.O_RDONLY:
+            assert os.read(fd, len(test_file_contents)) == test_file_contents
+        else:
+            os.write(fd, test_string)
         os.close(fd)
+
+        if flags == os.O_RDONLY:
+            assert os.stat(path).st_size == len(test_file_contents)
+        elif flags & os.O_TRUNC:
+            assert os.stat(path).st_size == len(test_string)
+        else:
+            assert os.stat(path).st_size == (len(test_string) +
+                                             len(test_file_contents))
 
 
 @pytest.mark.parametrize("disabled_call", [
@@ -129,7 +145,7 @@ def os_chmod_fixture(request):
     if should_create:
         path = shield.common.make_unique(path)
         with open(path, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
@@ -184,7 +200,7 @@ def os_chown_fixture(request):
     if should_create:
         path = shield.common.make_unique(path)
         with open(path, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
@@ -252,7 +268,7 @@ def os_link_fixture(request):
     if should_create:
         path = shield.common.make_unique(source)
         with open(path, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
@@ -377,7 +393,7 @@ def os_remove_fixture(request):
     if should_create:
         path = shield.common.make_unique(path)
         with open(path, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
@@ -493,7 +509,7 @@ def os_rename_fixture(request):
     if should_create:
         src = shield.common.make_unique(src)
         with open(src, 'w') as f:
-            f.write("test\n")
+            f.write(test_file_contents)
         created_file = True
 
     shield.install_hooks()
