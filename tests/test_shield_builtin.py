@@ -52,7 +52,7 @@ def builtin_open_fixture(request):
 
     shield.install_hooks()
     try:
-        yield (path, mode, created_file, expected_exception)
+        yield (path, mode, expected_exception)
     except Exception:
         traceback.print_exc()
     finally:
@@ -64,7 +64,7 @@ def builtin_open_fixture(request):
 
 def test_builtin_open(builtin_open_fixture):
     test_string = "receipt\n"
-    path, mode, created_file, expected_exception = builtin_open_fixture
+    path, mode, expected_exception = builtin_open_fixture
     if expected_exception:
         with pytest.raises(expected_exception):
             open(path, mode)
