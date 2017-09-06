@@ -38,9 +38,9 @@ def do_unhook(module):
     hooks = module.HOOKS
     originals = module.ORIGINALS
     original_module = module.ORIGINAL_MODULE
-    for hook, info in hooks.iteritems():
-        # Get the original function
-        original_function = originals[hook]
+    for hook, original_function in originals.iteritems():
+        # Get info about how it was hooked
+        info = hooks[hook]
 
         # Unhook the function
         if info is None:
