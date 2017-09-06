@@ -98,19 +98,23 @@ def test_os_open(os_open_fixture):
                                              len(test_file_contents))
 
 
+def _has(name):
+    return pytest.mark.skipif(not hasattr(os, name),
+                              reason="os.{} does not exist".format(name))
+
 @pytest.mark.parametrize("disabled_call", [
-    lambda: os.chflags("/tmp/stuff", stat.SF_IMMUTABLE),
-    lambda: os.chroot("/tmp/stuff"),
-    lambda: os.lchflags("/tmp/stuff", stat.SF_IMMUTABLE),
-    lambda: os.mkfifo("/tmp/stuff"),
-    lambda: os.mkfifo("/tmp/stuff", 0666),
-    lambda: os.mknod("/tmp/stuff"),
-    lambda: os.mknod("/tmp/stuff", 0666, 0),
-    lambda: os.makedev(5, 5),
-    lambda: os.pathconf("/tmp/stuff", "PC_FILESIZEBITS"),
-    lambda: os.removedirs("/tmp/stuff"),
-    lambda: os.renames("/tmp/stuff", "/tmp/other-stuff"),
-    lambda: os.utime("/tmp/stuff", None),
+    _has("chflags")(lambda: os.chflags("/tmp/stuff", stat.SF_IMMUTABLE)),
+    _has("chroot")(lambda: os.chroot("/tmp/stuff")),
+    _has("lchflags")(lambda: os.lchflags("/tmp/stuff", stat.SF_IMMUTABLE)),
+    _has("mkfifo")(lambda: os.mkfifo("/tmp/stuff")),
+    _has("mkfifo")(lambda: os.mkfifo("/tmp/stuff", 0666)),
+    _has("mknod")(lambda: os.mknod("/tmp/stuff")),
+    _has("mknod")(lambda: os.mknod("/tmp/stuff", 0666, 0)),
+    _has("makedev")(lambda: os.makedev(5, 5)),
+    _has("pathconf")(lambda: os.pathconf("/tmp/stuff", "PC_FILESIZEBITS")),
+    _has("removedirs")(lambda: os.removedirs("/tmp/stuff")),
+    _has("renames")(lambda: os.renames("/tmp/stuff", "/tmp/other-stuff")),
+    _has("utime")(lambda: os.utime("/tmp/stuff", None)),
 ])
 def test_disabled(disabled_call):
     shield.install_hooks()
