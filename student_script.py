@@ -1,5 +1,35 @@
-import shield
 import os
+import shutil
+import shield
+
+
+def test_shutil_rmtree(base_path, expected_exception):
+    shield.uninstall_hooks()
+    
+    path = os.path.join(base_path, "unique-nonexistent-directory")
+    os.mkdir(path)
+    
+    file_path = os.path.join(path, "unique-nonexistent-file.txt")
+    with open(file_path, 'w') as f:
+        f.write("test\n")
+
+    shield.install_hooks()
+
+    if expected_exception:
+        try:
+            shutil.rmtree(path)
+        except expected_exception:
+            print "Correctly shielded!"
+    else:
+        shutil.rmtree(path)
+
+    if expected_exception:
+        shield.uninstall_hooks()
+        shutil.rmtree(path)
+        shield.install_hooks()
+
+test_shutil_rmtree(shield.common.get_temp_path(), None)
+test_shutil_rmtree(os.path.expanduser("~"), shield.common.ShieldError)
 
 
 try:
