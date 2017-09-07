@@ -121,8 +121,10 @@ def is_in_directory(path, path_to_directory):
 
     path_drive, path_parts = split_path(path)
     directory_drive, directory_parts = split_path(path_to_directory)
-
-    return (path_drive == directory_drive and
+    
+    return (len(path_parts) > 0 and
+            len(directory_parts) > 0 and
+            path_drive == directory_drive and
             list_startswith(path_parts, directory_parts))
 
 

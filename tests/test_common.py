@@ -81,6 +81,9 @@ def test_list_startswith(a, b, expected):
 
 
 @pytest.mark.parametrize("path, path_to_directory, expected", [
+    ("/tmp/test", "/", True),
+    ("/tmp/test", "", False),
+    ("", "/tmp/test", False),
     ("/tmp/test/stuff", "/tmp/test", True),
     (r"I:\shared\stuff", r"C:\shared\stuff", False),
     (r"I:\shared\stuff", r"C:\shared\stuff\zzzz", False),
